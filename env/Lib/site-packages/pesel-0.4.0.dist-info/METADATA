@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: pesel
+Version: 0.4.0
+Summary: 
+Author: Jakub Spórna
+Author-email: jakub.sporna@gmail.com
+Requires-Python: >=3.9,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
