@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteka - Lista Użytkowników</title>
+    <style>
+body {
+    background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
+
+    background-size: cover;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #333; 
+    color: white; 
+    padding: 10px;
+    text-align: center;
+}
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+nav ul li {
+    display: inline;
+    margin-right: 10px;
+}
+nav ul li a {
+    color: white; 
+    text-decoration: none;
+}
+main {
+    padding: 20px;
+    text-align: center;
+}
+footer {
+    background-color: #555; 
+    color: white;
+    padding: 10px;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+select {
+    padding: 10px;
+    font-size: 16px;
+}
+
+button {
+    padding: 15px 30px; 
+    border: none;
+    background-color: black; 
+    color: white; 
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px; 
+    font-size: 16px; 
+}
+
+button:hover {
+    background-color: #333; 
+}
+.button-group {
+    margin-top: 20px;
+    text-align: center;
+}
+table {
+    margin: 20px auto;
+    width: 80%;
+    background-color: rgba(255, 255, 255, 0.8); 
+    border-collapse: collapse;
+}
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #333;
+    color: white;
+}
+
+button, input[type='submit'] {
+    padding: 10px 20px;
+    border: none;
+    background-color: black; 
+    color: white; 
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+    position: relative;
+    top: 490px;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Witaj w bibliotece</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Strona główna</a></li>
+                <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
+                <li><a href="{% url 'addUser' %}">Dodaj</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <table border="1">
+
+
+                {% csrf_token %}
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <thead>
+                        <tr>
+                          <th>Uprawnienia</th>
+                          <th>Dodaj </th>
+                        </tr>
+                    {{ form.as_table }}
+
+                    <input type="submit" value="Zapisz">
+                    </form>
+
+        
+
+
+          
+    </main>
+
+
+
+    <footer>
+        <p>&copy; 2024 Biblioteka</p>
+    </footer>
+</body>
+</html>
