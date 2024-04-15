@@ -95,7 +95,7 @@ button, input[type='submit'] {
     cursor: pointer;
     margin: 0 5px;
     position: relative;
-    top: 490px;
+    bottom: 100%;
 }
 
     </style>
@@ -126,19 +126,16 @@ button, input[type='submit'] {
                 <form method="POST" action="">
                     {% csrf_token %}
                     <thead>
+                        <table>
                         <tr>
                           <th>Uprawnienia</th>
                           <th>Dodaj </th>
                         </tr>
-                    {{ form.as_table }}
 
+                    {{ form.as_table }}
+                </table>
                     <input type="submit" value="Zapisz">
                     </form>
-
-        
-
-
-          
     </main>
 
 

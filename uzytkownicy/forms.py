@@ -1,5 +1,7 @@
 from django import forms
 from .models import User, Permissions
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class UserCreateUpdateForm(forms.ModelForm):
     class Meta:

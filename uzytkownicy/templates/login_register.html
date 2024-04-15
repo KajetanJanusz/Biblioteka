@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteka - Dodaj użytkownika</title>
+    <title>Biblioteka - Logowanie</title>
     <style>
         body {
             background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
@@ -47,79 +48,60 @@
             width: 100%;
         }
 
-        button, input[type='submit'] {
-            padding: 10px 20px;
-            border: none;
-            background-color: black; 
-            color: white; 
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 0 5px; 
-            position: relative;
-            left: 50%;
-            transform: translate(-50%);
-        }
-
-        button:hover {
-            background-color: #333;
-        }
-
-        .button-group {
-            margin-top: 1px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="date"],
-        select {
-            padding: 15px; 
-            margin-bottom: 10px;
-            width: 300px;
-            border-radius: 5px;
-            border: none;
-            display: block; 
+        .login {
+            background: rgba(255, 255, 255, 0.7); /* Przezroczyste tło */
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
             margin: auto;
-            background-color: #eee; 
+            margin-top: 50px;
+            transition: box-shadow 0.3s;
         }
 
-        /* label {
-            display: block; 
+        .login:hover {
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .login label {
+            display: block;
             margin-bottom: 5px;
-            margin-top: 10px;
-            color: white; 
-            text-shadow: -1px -1px 0 #000,  
-                  1px -1px 0 #000,
-                  -1px 1px 0 #000,
-                   1px 1px 0 #000; 
-} */
-        .helptext {
-            color: white; /* Zmiana koloru tekstu na biały */
-            text-shadow: -1px -1px 0 #000,  
-                      1px -1px 0 #000,
-                     -1px 1px 0 #000,
-                      1px 1px 0 #000; /* Dodanie czarnej obwódki */
-            padding-bottom: 10px;
-            display: hidden;
-    }
+            color: #333;
+        }
 
-    form{
-    background-color: #fff;
-    border-radius: 20px;
-    padding: 20px 0 20px 0;
-    width: 600px;
-    display: inline-block;
-    margin-bottom: 30px;
-        position: relative;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, 30px);
-        padding: 20px;
-    }
+        .login input[type="text"],
+        .login input[type="password"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
 
-    .username, .password{
-        padding: 20px;
-    }
+        .login input[type="text"]:focus,
+        .login input[type="password"]:focus {
+            outline: none;
+            border-color: #555;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
 
+        .login input[type="submit"] {
+            padding: 12px 20px;
+            border: none;
+            background-color: #333;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .login input[type="submit"]:hover {
+            background-color: #555;
+        }
 
     </style>
 </head>
@@ -139,33 +121,21 @@
             </ul>
         </nav>
     </header>
-    {% if page == 'login' %}
-    <div class="login">
-        <form method="POST" action="">
-            {% csrf_token %}
-            <div class="inputs">
-                
-            <div class="username">
-                <label>Nazwa użytkownika:</label>
-                <input type="text" name="username"/>
-            </div>
-            <div class="password">
-                <label>Hasło:</label>
-                <input type="password" name="password" />
-            </div>
-            </div>
-            <input type="submit" value="Zaloguj"/>
-        </form>
-    </div>
-{% else %}
-    <div class="register">
-        <form method="POST" action="">
-            {% csrf_token %}
-            {{ form.as_p }}
-                <input type="submit" value="Zarejestruj się"/>
-        </form>
-    </div>
-{% endif %}
+
+    <main>
+        <div class="login">
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="inputs">
+                    <label for="username">Nazwa użytkownika:</label>
+                    <input type="text" id="username" name="username" placeholder="Wprowadź nazwę użytkownika" required />
+                    <label for="password">Hasło:</label>
+                    <input type="password" id="password" name="password" placeholder="Wprowadź hasło" required />
+                </div>
+                <input type="submit" value="Zaloguj"/>
+            </form>
+        </div>
+    </main>
 
     <footer>
         <p>&copy; 2024 Biblioteka</p>
