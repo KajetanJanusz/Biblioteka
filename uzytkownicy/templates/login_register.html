@@ -55,6 +55,9 @@
             border-radius: 5px;
             cursor: pointer;
             margin: 0 5px; 
+            position: relative;
+            left: 50%;
+            transform: translate(-50%);
         }
 
         button:hover {
@@ -96,6 +99,7 @@
                      -1px 1px 0 #000,
                       1px 1px 0 #000; /* Dodanie czarnej obwódki */
             padding-bottom: 10px;
+            display: hidden;
     }
 
     form{
@@ -105,8 +109,16 @@
     width: 600px;
     display: inline-block;
     margin-bottom: 30px;
-}
+        position: relative;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, 30px);
+        padding: 20px;
+    }
 
+    .username, .password{
+        padding: 20px;
+    }
 
 
     </style>
@@ -119,25 +131,41 @@
                 <li><a href="{% url 'home' %}">Strona główna</a></li>
                 <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}">Wyloguj</a></li>
-            {% else %}
-                <li><a href="{% url 'login' %}">Zaloguj</a></li>    
-                <li><a href="{% url 'register' %}">Zarejestruj</a></li>
-            {% endif %}
+                    <li><a href="{% url 'logout' %}">Wyloguj</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Zaloguj</a></li>    
+                    <li><a href="{% url 'register' %}">Zarejestruj</a></li>
+                {% endif %}
             </ul>
         </nav>
     </header>
-
-    <main>
-        <h2>Dodaj użytkownika:</h2>
+    {% if page == 'login' %}
+    <div class="login">
         <form method="POST" action="">
-        {% csrf_token %}
-        {{ form.as_p }}
-            <input type="submit" value="Dodaj">
+            {% csrf_token %}
+            <div class="inputs">
+                
+            <div class="username">
+                <label>Nazwa użytkownika:</label>
+                <input type="text" name="username"/>
+            </div>
+            <div class="password">
+                <label>Hasło:</label>
+                <input type="password" name="password" />
+            </div>
+            </div>
+            <input type="submit" value="Zaloguj"/>
         </form>
-
-
-    </main>
+    </div>
+{% else %}
+    <div class="register">
+        <form method="POST" action="">
+            {% csrf_token %}
+            {{ form.as_p }}
+                <input type="submit" value="Zarejestruj się"/>
+        </form>
+    </div>
+{% endif %}
 
     <footer>
         <p>&copy; 2024 Biblioteka</p>

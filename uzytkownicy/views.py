@@ -8,6 +8,10 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from .forms import UserCreateUpdateForm, UserDeleteForm, UpdatePermissions
 from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 
 
 class HomeSite(ListView):
@@ -23,7 +27,8 @@ class ListUsersView(ListView):
         if query != None:
             users = User.objects.filter(Q(first_name__icontains=query) |
                                             Q(last_name__icontains=query) |
-                                            Q(username__icontains=query),
+                                            Q(username__icontains=query) |
+                                            Q(user__permissions__icontaints=query),
                                             is_superuser=False, is_deleted=False).order_by('-utworzony')
             return users
         else:
@@ -67,3 +72,43 @@ def permissions(request, pk):
             return redirect('users')
 
     return render(request, 'permissionsUser.html', {'form': form})
+
+def registerPage(request):
+    form = UserCreationForm()
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            login(request, form)
+            return redirect('home')
+        else:
+            messages.error(request, 'Coś poszło nie tak :/')
+
+    return render(request, 'login_register.html', {'form': form})
+
+
+def loginPage(request):
+    page = 'login'
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, 'Użytkownik nie istnieje')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Zalogowano poprawnie.')
+            return redirect('home')
+
+    context = {'page': page}
+    return render(request, 'login_register.html', context)
+
+
+@login_required
+def logoutPage(request):
+    logout(request)
+    return redirect('home')
