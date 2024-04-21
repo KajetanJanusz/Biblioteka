@@ -26,3 +26,26 @@ def replace(input: str, index: int, number: str):
     list_input = list(input)
     list_input[index] = number
     return ''.join(list_input)
+
+def password_validator(value: str):
+    list_password = list(value)
+    uppercase = 0
+    lowercase = 0
+    digit = 0
+    special_char = 0
+
+    if len(list_password) >= 8 and len(list_password) <= 15:
+        for x in list_password:
+            if x in 'QWERTYUIOPASDFGHJKLZXCVBNM':
+                uppercase += 1
+            if x in 'qwertyuiopasdfghjklzxcvbnm':
+                lowercase += 1
+            if x in '1234567890':
+                digit += 1
+            if x in '-_!*#$&':
+                special_char += 1
+        if uppercase == 0 or lowercase == 0 or digit == 0 or special_char == 0:
+            raise ValidationError('Hasło niepoprawne')
+    else:
+        raise ValidationError('Hasło za długie lub za krótkie')
+                

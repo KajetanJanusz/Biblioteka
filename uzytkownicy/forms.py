@@ -2,11 +2,12 @@ from django import forms
 from .models import User, Permissions
 from django.contrib.auth import get_user_model
 User = get_user_model()
+from django.contrib.auth.forms import UserCreationForm
 
 class UserCreateUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'Telefon',
+        fields = ['username', 'first_name', 'last_name', 'password_db', 'email', 'Telefon',
             'Pesel', 'Data_urodzenia', 'Plec', 'pracownik']
         
         widgets = { 'Data_urodzenia': (forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}))}
@@ -15,12 +16,19 @@ class UserCreateUpdateForm(forms.ModelForm):
             'username': 'Login',
             'first_name': 'Imię',
             'last_name': 'Nazwisko',
+            'password_db': 'Hasło',
             'Telefon': 'Telefon',
             'Pesel': 'Pesel',
             'Data_urodzenia': 'Data urodzenia',
             'Plec': 'Płeć',
             'pracownik': 'Pracownik',
         }
+
+class UserChangePasswordForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['password_db']
+        labels = {'password_db': 'Hasło'}
 
 class UserDeleteForm(forms.ModelForm):
     class Meta:

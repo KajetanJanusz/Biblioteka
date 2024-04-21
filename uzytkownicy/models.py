@@ -1,7 +1,7 @@
 from typing import Iterable
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from .validators import validate_pesel, regex_telefon, regex_pesel, replace
+from .validators import validate_pesel, regex_telefon, regex_pesel, replace, password_validator
 from django.core.exceptions import ValidationError
 from datetime import datetime
 
@@ -13,6 +13,8 @@ class User(AbstractUser):
     # Adres_ID = models.OneToOneField(Adres, on_delete=models.CASCADE, null=False)
     Pesel = models.CharField(max_length=11, unique=True, null=False, validators=[regex_pesel, validate_pesel])
     Data_urodzenia = models.DateField(null = False)
+    password_db = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
+    generated_password = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
     Plec = models.IntegerField(choices=choices, null=False)
     pracownik = models.BooleanField(default = False)
     utworzony = models.DateTimeField(auto_now_add=True)
@@ -70,6 +72,10 @@ class Permissions(models.Model):
     Edit_user = models.BooleanField(verbose_name="Edytowanie użytkownika", default=False)
     List_user = models.BooleanField(verbose_name="Listowanie użytkowników", default=False)
     Detail_user = models.BooleanField(verbose_name="Detale użytkownika", default=False)
+
+    def __str__(self) -> str:
+        return f"{self.User.username}'s permissions"
+    
 
 
 

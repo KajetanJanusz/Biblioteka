@@ -106,6 +106,7 @@
             <ul>
                 <li><a href="{% url 'home' %}">Strona główna</a></li>
                 <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
+                <li><a href="{% url 'list-permissions' %}">Lista uprawnień</a></li>
                 <li><a href="{% url 'addUser' %}">Dodaj</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'logout' %}">Wyloguj</a></li>

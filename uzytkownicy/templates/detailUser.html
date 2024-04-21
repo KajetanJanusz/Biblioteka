@@ -149,6 +149,7 @@ th {
         <a href="{% url 'updateUser' user.id %}"><button>Edytuj</button></a>
         <a href="{% url 'deleteUser' user.id %}"><button>Usuń</button></a>
         <a href="{% url 'permissions' user.id %}"><button>Uprawnienia</button></a>
+        <a href="{% url 'password-change' user.id %}"><button>Hasło</button></a>
     </div>
 
     <footer>

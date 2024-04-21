@@ -11,7 +11,7 @@ class MyUserAdmin(UserAdmin):
     readonly_fields = ['edytowany', 'utworzony']
     fieldsets = UserAdmin.fieldsets + (
         ('Dodatkowe', {'fields': ('Telefon',
-            'Pesel', 'Data_urodzenia', 'Plec', 'pracownik',
+            'Pesel', 'Data_urodzenia', 'password_db', 'generated_password' ,'Plec', 'pracownik',
             'is_deleted', 'utworzony', 'edytowany')}),
     )
 
