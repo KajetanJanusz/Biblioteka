@@ -105,6 +105,19 @@ class ChangeUserPasswordView(UpdateView):
     template_name = 'updatePassword.html'
     success_url = reverse_lazy('password-change-done')
 
+    def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
+        password_1 = request.POST.get('password_1')
+        password_2 = request.POST.get('password_2')
+        user = User.objects.get(id=self.get_object().pk)
+
+        if password_1 == password_2:
+            user.password_db = password_1
+            user.save()
+            return redirect('password-change-done')
+        else:
+            messages.error(request, "Hasła się nie zgadzają")
+            return redirect('password-change', self.get_object().pk)
+
 class ChangeUserPasswordDoneView(TemplateView):
     template_name = 'updatePasswordDone.html'
     uccess_url = reverse_lazy('home')
