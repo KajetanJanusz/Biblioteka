@@ -106,7 +106,7 @@ class ChangeUserPasswordView(UpdateView):
     success_url = reverse_lazy('password-change-done')
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
-        password_1 = request.POST.get('password_1')
+        password_1 = request.POST.get('id_password_db')
         password_2 = request.POST.get('password_2')
         user = User.objects.get(id=self.get_object().pk)
 
@@ -115,7 +115,7 @@ class ChangeUserPasswordView(UpdateView):
             user.save()
             return redirect('password-change-done')
         else:
-            messages.error(request, "Hasła się nie zgadzają")
+            messages.error(request, "Hasła się nie zgadzają lub hasło jest niepoprawne")
             return redirect('password-change', self.get_object().pk)
 
 class ChangeUserPasswordDoneView(TemplateView):
@@ -170,7 +170,7 @@ def resetPassword(request):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            # messages.error(request, "Zły mail")
+            messages.error(request, "Zły adres email lub login")
             return redirect('reset-password')
         
         if user.username == username and user.email == email:

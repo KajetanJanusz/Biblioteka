@@ -45,7 +45,7 @@ def password_validator(value: str):
             if x in '-_!*#$&':
                 special_char += 1
         if uppercase == 0 or lowercase == 0 or digit == 0 or special_char == 0:
-            raise ValidationError('Hasło niepoprawne')
+            raise ValidationError('Hasło musi składać się z dużej litery, małej litery, liczby i znaku specjalnego')
     else:
-        raise ValidationError('Hasło niepoprawne')
+        raise ValidationError('Hasło musi miec miedzy 8 a 15 znaków')
                 
