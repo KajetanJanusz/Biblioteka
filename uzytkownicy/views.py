@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from .models import User, Permissions
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView
+from django.views.generic import FormView, TemplateView, ListView, DetailView, CreateView, UpdateView
 from .forms import UserCreateUpdateForm, UserDeleteForm, UpdatePermissions, UserChangePasswordForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -109,16 +109,19 @@ class ChangeUserPasswordDoneView(TemplateView):
     template_name = 'updatePasswordDone.html'
     uccess_url = reverse_lazy('home')
 
-def resetPassword(request):
+class ResetPasswordView(FormView):
+    form_class = UserChangePasswordForm
+    template_name = 'resetPassword.html'
 
-    if request.method == 'POST':
+    def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         username = request.POST.get('username')
         email = request.POST.get('email')
         
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            raise ValidationError("nie ma")
+            # messages.error(request, "Zły mail")
+            return redirect('reset-password')
         
         if user.username == username and user.email == email:
             uppercase = list()
@@ -142,7 +145,44 @@ def resetPassword(request):
                 email_from = settings.EMAIL_HOST_USER  
                 recipient_list = [user.email,]  
                 message = f'Twoje nowe hasło {new_password}' 
-                EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()  
+                EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()
+        return 
+
+def resetPassword(request):
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        
+        try:
+            user = User.objects.get(username=username)
+        except ObjectDoesNotExist:
+            # messages.error(request, "Zły mail")
+            return redirect('reset-password')
+        
+        if user.username == username and user.email == email:
+            uppercase = list()
+            for x in range(9):
+                uppercase.append(choice(ascii_uppercase))
+            lowercase = choice(ascii_lowercase)
+            digit = randint(0,9)
+            special_char = choice('!@#$%')
+            new_password = f"{''.join(uppercase)}{lowercase}{digit}{special_char*2}"
+            user.password_db = new_password
+            user.generated_password = new_password
+            user.save()
+            with get_connection(  
+                host=settings.EMAIL_HOST, 
+                port=settings.EMAIL_PORT,  
+                username=settings.EMAIL_HOST_USER, 
+                password=settings.EMAIL_HOST_PASSWORD, 
+                use_tls=settings.EMAIL_USE_TLS  
+            ) as connection:  
+                subject = 'Nowe hasło' 
+                email_from = settings.EMAIL_HOST_USER  
+                recipient_list = [user.email,]  
+                message = f'Twoje nowe hasło {new_password}' 
+                EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()
  
             return redirect('login')
 
@@ -184,9 +224,23 @@ def loginPage(request):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            raise ValidationError("nie ma")
+            messages.error(request, "Niepoprawny login lub hasło")
+            return redirect('login')
+        
+        if user.username == username and user.password_db != password:
+            user.passwords_attempts = user.passwords_attempts + 1
+            user.save()
+            if user.passwords_attempts >= 3:
+                messages.error(request, 'Twoje konto jest zablokowane, napisz do administratora')
+                return redirect('login')
+            else:
+                messages.error(request, "Niepoprawny login lub hasło")
+                return redirect('login')
 
-        if user.password_db == password and user.username == username:
+        elif user.password_db == password and user.username == username:
+            if user.passwords_attempts >= 3:
+                messages.error(request, 'Twoje konto jest zablokowane, napisz do administratora')
+                return redirect('login')
             if user.password_db == user.generated_password:
                 login(request, user)
                 return redirect('password-change', pk=user.id)
@@ -195,7 +249,9 @@ def loginPage(request):
             messages.success(request, 'Zalogowano poprawnie.')
             return redirect('home')
         else:
-            messages.error(request, 'Niepoprawne dane')
+            messages.error(request, "Niepoprawny login lub hasło")
+            return redirect('login')
+
 
     context = {'page': page}
     return render(request, 'login_register.html', context)
@@ -211,6 +267,7 @@ def logoutPage(request):
 
 def listPermissions(request):
     return render(request, 'listPermissions.html')
+
 
 def addUserPermission(request):
     permission = Permissions.objects.filter(Add_user=True)

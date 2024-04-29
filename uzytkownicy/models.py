@@ -15,6 +15,7 @@ class User(AbstractUser):
     Data_urodzenia = models.DateField(null = False)
     password_db = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
     generated_password = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
+    passwords_attempts = models.IntegerField(default=0)
     Plec = models.IntegerField(choices=choices, null=False)
     pracownik = models.BooleanField(default = False)
     utworzony = models.DateTimeField(auto_now_add=True)
@@ -62,7 +63,7 @@ class User(AbstractUser):
 
 
 class Permissions(models.Model):
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
+    User = models.OneToOneField(User, on_delete=models.CASCADE)
     Add_books = models.BooleanField(verbose_name="Dodawanie książek", default=False)
     Delete_books = models.BooleanField(verbose_name="Usuwanie książek", default=False)
     Edit_books = models.BooleanField(verbose_name="Edytowanie książek", default=False)

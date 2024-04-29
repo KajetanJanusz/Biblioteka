@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteka - Logowanie</title>
+    <title>Biblioteka - Wyloguj</title>
     <style>
         body {
             background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
@@ -48,7 +48,7 @@
             width: 100%;
         }
 
-        .login {
+        .logout-form {
             background: rgba(255, 255, 255, 0.7); /* Przezroczyste tło */
             border-radius: 15px;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
@@ -60,35 +60,18 @@
             transition: box-shadow 0.3s;
         }
 
-        .login:hover {
+        .logout-form:hover {
             box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .login label {
+        .logout-form label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
             color: #333;
+            font-weight: bold;
         }
 
-        .login input[type="text"],
-        .login input[type="password"] {
-            padding: 10px;
-            margin-bottom: 20px;
-            width: 100%;
-            border-radius: 25px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            transition: box-shadow 0.3s, border-color 0.3s;
-        }
-
-        .login input[type="text"]:focus,
-        .login input[type="password"]:focus {
-            outline: none;
-            border-color: #555;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .login input[type="submit"] {
+        .logout-form input[type="submit"] {
             padding: 12px 20px;
             border: none;
             background-color: #333;
@@ -99,8 +82,8 @@
             transition: background-color 0.3s;
         }
 
-        .login input[type="submit"]:hover {
-            background-color: #555;
+        .logout-form input[type="submit"]:hover {
+           background-color: #555;
         }
 
     </style>
@@ -122,12 +105,13 @@
     </header>
 
     <main>
-
-        <h2>Wyloguj</h2>
-    <form action="" method="POST">
-        {% csrf_token %}
-        <input type="submit" name="" id="" met value="Wyloguj">
-    </form>
+        <div class="logout-form">
+            <h2>Czy na pewno chcesz się wylogować?</h2>
+            <form action="" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="Wyloguj się">
+            </form>
+        </div>
     </main>
 
     <footer>

@@ -53,6 +53,19 @@ footer {
     text-align: center;
 }
 
+.success {
+  color: #4F8A10;
+  background-color: #DFF2BF;
+  border: 1px solid #4F8A10;
+  padding: 10px;
+  margin: 10px 0;
+  display: inline;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);  
+}
+
+
     </style>
 </head>
 <body>
@@ -72,7 +85,13 @@ footer {
     </header>
 
     <main>
-
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
     </main>
 
     <footer>

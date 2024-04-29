@@ -47,5 +47,5 @@ def password_validator(value: str):
         if uppercase == 0 or lowercase == 0 or digit == 0 or special_char == 0:
             raise ValidationError('Hasło niepoprawne')
     else:
-        raise ValidationError('Hasło za długie lub za krótkie')
+        raise ValidationError('Hasło niepoprawne')
                 

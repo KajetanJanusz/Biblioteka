@@ -103,6 +103,33 @@
             background-color: #555;
         }
 
+        .forgot-password {
+            display: inline-block;
+            padding: 12px 20px;
+            border: none;
+            background-color: #333;
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .forgot-password:hover {
+            background-color: #555;
+        }
+
+        .error {
+            display: inline;
+            color: #d8000c;
+            background-color: #ffbaba;
+            border: 1px solid #ff0000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+
     </style>
 </head>
 <body>
@@ -122,6 +149,13 @@
     </header>
 
     <main>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         <div class="login">
             <form method="POST" action="">
                 {% csrf_token %}
@@ -133,7 +167,7 @@
                 </div>
                 <input type="submit" value="Zaloguj"/>
             </form>
-            <a href="{% url 'reset-password' %}">Zapomniałem hasła</a>
+            <a class="forgot-password" href="{% url 'reset-password' %}">Zapomniałem hasła</a>
         </div>
     </main>
 
