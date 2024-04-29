@@ -120,7 +120,7 @@ class ResetPasswordView(FormView):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            # messages.error(request, "Zły mail")
+            messages.error(request, "Zły mail")
             return redirect('reset-password')
         
         if user.username == username and user.email == email:
