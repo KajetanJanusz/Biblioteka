@@ -1,32 +1,28 @@
 from typing import Any
 from django.db.models import Q
+from django.db.models.base import Model as Model
+from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from .models import User, Permissions
-from django.urls import reverse_lazy
-from django.views.generic import FormView, TemplateView, ListView, DetailView, CreateView, UpdateView
+from django.urls import reverse_lazy, reverse
+from django.views.generic import FormView, TemplateView, ListView, DetailView, CreateView, UpdateView, View
 from .forms import UserCreateUpdateForm, UserDeleteForm, UpdatePermissions, UserChangePasswordForm
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.conf import settings
+from django.contrib.auth import login, logout
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.mail import send_mail
-from random import choice, randint
-from string import ascii_lowercase, ascii_uppercase
-from django.core.mail import EmailMessage, get_connection
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.exceptions import ValidationError
+from .methods import generate_password, send_email, change_passwords
+from django.contrib.auth.views import LoginView
 
 
 class HomeSite(ListView):
     model = User
     template_name = 'home.html'
 
-class ListUsersView(UserPassesTestMixin, ListView):
+class ListUsersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = User
     template_name = 'listUsers.html'
 
@@ -34,6 +30,7 @@ class ListUsersView(UserPassesTestMixin, ListView):
         return Permissions.objects.get(User=self.request.user.id).List_user
     
     def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
         return redirect('home')
     
     def get_queryset(self):
@@ -41,8 +38,7 @@ class ListUsersView(UserPassesTestMixin, ListView):
         if query != None:
             users = User.objects.filter(Q(first_name__icontains=query) |
                                             Q(last_name__icontains=query) |
-                                            Q(username__icontains=query) |
-                                            Q(user__permissions__icontaints=query),
+                                            Q(username__icontains=query),
                                             is_superuser=False, is_deleted=False).order_by('-utworzony')
             return users
         else:
@@ -51,7 +47,7 @@ class ListUsersView(UserPassesTestMixin, ListView):
             return users
 
 
-class DetailUserView(UserPassesTestMixin, DetailView):
+class DetailUserView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = User
     context_object_name = 'user'
     template_name = 'detailUser.html'
@@ -60,9 +56,10 @@ class DetailUserView(UserPassesTestMixin, DetailView):
         return Permissions.objects.get(User=self.request.user.id).Detail_user
     
     def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
         return redirect('home')
 
-class AddUserView(UserPassesTestMixin, CreateView):
+class AddUserView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = User
     form_class = UserCreateUpdateForm
     template_name = 'addUser.html'
@@ -72,9 +69,10 @@ class AddUserView(UserPassesTestMixin, CreateView):
         return Permissions.objects.get(User=self.request.user.id).Add_user
     
     def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
         return redirect('home')
 
-class UpdateUserView(UserPassesTestMixin, UpdateView):
+class UpdateUserView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     form_class = UserCreateUpdateForm
     template_name = 'updateUser.html'
@@ -84,10 +82,11 @@ class UpdateUserView(UserPassesTestMixin, UpdateView):
         return Permissions.objects.get(User=self.request.user.id).Edit_user
     
     def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
         return redirect('home')
 
 
-class DeleteUserView(UserPassesTestMixin, UpdateView):
+class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     form_class = UserDeleteForm
     template_name = 'deleteUser.html'
@@ -97,30 +96,50 @@ class DeleteUserView(UserPassesTestMixin, UpdateView):
         return Permissions.objects.get(User=self.request.user.id).Delete_user
     
     def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
         return redirect('home')
     
-class ChangeUserPasswordView(UpdateView):
+class ChangeUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     form_class = UserChangePasswordForm
     template_name = 'updatePassword.html'
-    success_url = reverse_lazy('password-change-done')
+    success_url = reverse_lazy('users')
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
-        password_1 = request.POST.get('id_password_db')
-        password_2 = request.POST.get('password_2')
-        user = User.objects.get(id=self.get_object().pk)
+        user = User.objects.get(id=self.kwargs['pk'])
+        change_passwords(user)
+        user.is_password_changed = False
+        user.save()
+        return super().post(request, *args, **kwargs)
 
-        if password_1 == password_2:
-            user.password_db = password_1
-            user.save()
-            return redirect('password-change-done')
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        form.save()
+        messages.success(self.request, 'Zaktualizowano!')
+        return super().form_valid(form)
+
+    def test_func(self) -> bool | None:
+        if User.objects.get(id=self.kwargs['pk']) == self.request.user:
+            return True
         else:
-            messages.error(request, "Hasła się nie zgadzają lub hasło jest niepoprawne")
-            return redirect('password-change', self.get_object().pk)
+            return Permissions.objects.get(User=self.request.user.id).Edit_user
+    
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
 
-class ChangeUserPasswordDoneView(TemplateView):
+class ChangeUserPasswordDoneView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'updatePasswordDone.html'
     uccess_url = reverse_lazy('home')
+
+    def test_func(self) -> bool | None:
+        if User.objects.get(id=self.kwargs['pk']) == self.request.user:
+            return True
+        else:
+            return Permissions.objects.get(User=self.request.user.id).Edit_user
+    
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
 
 class ResetPasswordView(FormView):
     form_class = UserChangePasswordForm
@@ -133,104 +152,65 @@ class ResetPasswordView(FormView):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            messages.error(request, "Zły mail")
+            messages.error(request, "Zły email lub login")
             return redirect('reset-password')
         
-        if user.username == username and user.email == email:
-            uppercase = list()
-            for x in range(9):
-                uppercase.append(choice(ascii_uppercase))
-            lowercase = choice(ascii_lowercase)
-            digit = randint(0,9)
-            special_char = choice('!@#$%')
-            new_password = f"{''.join(uppercase)}{lowercase}{digit}{special_char*2}"
-            user.password_db = new_password
-            user.generated_password = new_password
-            user.save()
-            with get_connection(  
-                host=settings.EMAIL_HOST, 
-                port=settings.EMAIL_PORT,  
-                username=settings.EMAIL_HOST_USER, 
-                password=settings.EMAIL_HOST_PASSWORD, 
-                use_tls=settings.EMAIL_USE_TLS  
-            ) as connection:  
-                subject = 'Nowe hasło' 
-                email_from = settings.EMAIL_HOST_USER  
-                recipient_list = [user.email,]  
-                message = f'Twoje nowe hasło {new_password}' 
-                EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()
-        return 
-
-def resetPassword(request):
-
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        
-        try:
-            user = User.objects.get(username=username)
-        except ObjectDoesNotExist:
-            messages.error(request, "Zły adres email lub login")
+        if user.email != email:
+            messages.error(request, 'Zły email lub login')
             return redirect('reset-password')
         
-        if user.username == username and user.email == email:
-            uppercase = list()
-            for x in range(9):
-                uppercase.append(choice(ascii_uppercase))
-            lowercase = choice(ascii_lowercase)
-            digit = randint(0,9)
-            special_char = choice('!@#$%')
-            new_password = f"{''.join(uppercase)}{lowercase}{digit}{special_char*2}"
-            user.password_db = new_password
-            user.generated_password = new_password
-            user.save()
-            with get_connection(  
-                host=settings.EMAIL_HOST, 
-                port=settings.EMAIL_PORT,  
-                username=settings.EMAIL_HOST_USER, 
-                password=settings.EMAIL_HOST_PASSWORD, 
-                use_tls=settings.EMAIL_USE_TLS  
-            ) as connection:  
-                subject = 'Nowe hasło' 
-                email_from = settings.EMAIL_HOST_USER  
-                recipient_list = [user.email,]  
-                message = f'Twoje nowe hasło {new_password}' 
-                EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()
- 
-            return redirect('login')
-
-    return render(request, 'resetPassword.html')
-
-
-def permissions(request, pk):
-    permission = Permissions.objects.get(User=User.objects.get(id=pk))
-    form = UpdatePermissions(instance=permission)
-
-    if request.method == "POST":
-        form = UpdatePermissions(request.POST, instance=permission)
-        if form.is_valid():
-            form.save()
-            return redirect('users')
-
-    return render(request, 'permissionsUser.html', {'form': form})
-
-def registerPage(request):
-    form = UserCreationForm()
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            login(request, form)
-            return redirect('home')
+        new_password = generate_password()
+        change_passwords(user)
+        user.current_password = new_password
+        user.is_password_changed = True
+        user.save()
+        send_email(new_password, user)
+        messages.success(request, "Email z hasłem został wysłany")
+        return redirect('login')
+    
+    def test_func(self) -> bool | None:
+        if User.objects.get(id=self.kwargs['pk']) == self.request.user:
+            return True
         else:
-            messages.error(request, 'Coś poszło nie tak :/')
+            return Permissions.objects.get(User=self.request.user.id).Edit_user
+    
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
 
-    return render(request, 'login_register.html', {'form': form})
+
+class PermissionsView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Permissions
+    form_class = UpdatePermissions
+    template_name = 'permissionsUser.html'
+    success_url = reverse_lazy('users')
+
+    def get_object(self):
+        user = User.objects.get(id=self.kwargs['pk'])
+        permission = Permissions.objects.get(User=user)
+
+        return permission
+    
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        form.save()
+        messages.success(self.request, 'Zaktualizowano!')
+        return super().form_valid(form)
+    
+    def test_func(self) -> bool | None:
+        if User.objects.get(id=self.kwargs['pk']) == self.request.user:
+            return True
+        else:
+            return Permissions.objects.get(User=self.request.user.id).Edit_user
+    
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
 
 
-def loginPage(request):
-    page = 'login'
-    if request.method == "POST":
+class CustomLoginView(LoginView):
+    template_name = 'login_register.html'
+
+    def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         username = request.POST.get('username')
         password = request.POST.get('password')
 
@@ -240,135 +220,78 @@ def loginPage(request):
             messages.error(request, "Niepoprawny login lub hasło")
             return redirect('login')
         
-        if user.username == username and user.password_db != password:
-            user.passwords_attempts = user.passwords_attempts + 1
-            user.save()
-            if user.passwords_attempts >= 3:
-                messages.error(request, 'Twoje konto jest zablokowane, napisz do administratora')
-                return redirect('login')
-            else:
-                messages.error(request, "Niepoprawny login lub hasło")
-                return redirect('login')
-
-        elif user.password_db == password and user.username == username:
-            if user.passwords_attempts >= 3:
-                messages.error(request, 'Twoje konto jest zablokowane, napisz do administratora')
-                return redirect('login')
-            if user.password_db == user.generated_password:
-                login(request, user)
-                return redirect('password-change', pk=user.id)
-            
-            login(request, user)
-            messages.success(request, 'Zalogowano poprawnie.')
-            return redirect('home')
-        else:
-            messages.error(request, "Niepoprawny login lub hasło")
+        if user.passwords_attempts >= 3:
+            messages.error(request, 'Twoje konto jest zablokowane, napisz do administratora')
             return redirect('login')
 
+        if user.current_password != password:
+            user.passwords_attempts += 1
+            user.save()
+            messages.error(request, 'Nieprawidłowe hasło lub nazwa użytkownika')
+            return redirect('login')
 
-    context = {'page': page}
-    return render(request, 'login_register.html', context)
+        if user.is_password_changed == True:
+            messages.info(request, 'Hasło zostało wygenerowane. Zmień hasło')
+            return redirect(reverse('password-change', kwargs={'pk': user.id}))
+            
+
+        login(self.request, user)
+        messages.success(request, 'Zalogowano poprawnie.')
+        return redirect('home')
 
 
-@login_required
-def logoutPage(request):
-    if request.method == 'POST':
+class CustomLogoutView(LoginRequiredMixin, View):
+    template_name = 'logout.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
         logout(request)
         return redirect('home')
+
+class ListPermissionsView(TemplateView):
+    template_name = 'listPermissions.html'
+
+class AddUserPermissionView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = User
+    template_name = 'listUsers.html'
+    permission = Permissions.objects.filter(Add_user=True).values_list('User', flat=True)
+
+    def get_queryset(self):
+        users = User.objects.filter(id__in=self.permission)
+        return users
     
-    return render(request, 'logout.html')
+    def test_func(self, *args, **kwargs) -> bool | None:
+        return Permissions.objects.get(User=self.request.user.id).Edit_user
+    
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
+    
+class ListUserPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(List_user=True).values_list('User', flat=True)
 
-def listPermissions(request):
-    return render(request, 'listPermissions.html')
+class DeleteUserPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Delete_user=True).values_list('User', flat=True)
+
+class EditUserPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Edit_user=True).values_list('User', flat=True)
+
+class DetailUserPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Edit_user=True).values_list('User', flat=True)
+
+class AddBookPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Add_books=True).values_list('User', flat=True)
+
+class DeleteBookPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Delete_books=True).values_list('User', flat=True)
+
+class EditBookPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Edit_books=True).values_list('User', flat=True)
+
+class DetailBookPermissionView(AddUserPermissionView):
+    permission = Permissions.objects.filter(Detail_book=True).values_list('User', flat=True)
 
 
-def addUserPermission(request):
-    permission = Permissions.objects.filter(Add_user=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def deleteUserPermission(request):
-    permission = Permissions.objects.filter(Delete_user=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def editUserPermission(request):
-    permission = Permissions.objects.filter(Edit_user=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def detailUserPermission(request):
-    permission = Permissions.objects.filter(Detail_user=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def addBookPermission(request):
-    permission = Permissions.objects.filter(Add_books=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def deleteBookPermission(request):
-    permission = Permissions.objects.filter(Delete_books=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def editBookPermission(request):
-    permission = Permissions.objects.filter(Edit_books=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def detailBookPermission(request):
-    permission = Permissions.objects.filter(Detail_book=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
-
-def listUserPermission(request):
-    permission = Permissions.objects.filter(List_user=True)
-    users = []
-    for x in permission:
-        users.append(User.objects.get(id=x.User.id))
-
-    context = {'object_list':users}
-
-    return render(request, 'listUsers.html', context=context)
 

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteka - Lista Użytkowników</title>
+    <style>
+        body {
+            background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333; 
+        }
+        header {
+            background-color: #333; 
+            color: white; 
+            padding: 10px;
+            text-align: center;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        nav ul li a {
+            color: white; 
+            text-decoration: none;
+        }
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #555; 
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+        .button-group {
+            margin-top: 20px;
+        }
+
+        table {
+            margin: 20px auto; 
+            border-collapse: collapse;
+            width: 80%;
+            background-color: rgba(255, 255, 255, 0.8); 
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 60%;
+        }
+        label {
+            font-size: 24px; 
+            font-weight: bold; 
+        }
+
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+            border: 1px solid #4F8A10;
+            padding: 10px;
+            margin: 10px 0;
+            display: inline;
+            left: 50%;
+            transform: translate(-50%, -50%);  
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Witaj w bibliotece</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Strona główna</a></li>
+                <li><a href="{% url 'register-book' %}">Dodaj</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Wyloguj</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Zaloguj</a></li>    
+            {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+
+
+        {% if page == None %}
+        <form action="" method="get">
+            <label for="search">Wyszukaj użytkownika:</label>
+            <br>
+            <input id="search" name="q" type="text" placeholder="Wyszukaj...">
+        </form>
+        {% endif %}
+
+        <h1>{{ page }}</h1>
+
+        
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <table>
+            <tr>
+                <th>Klient</th>
+                <th>Data wypożyczenia</th>
+                <th>Data zwrotu</th>
+                <th>Książka</th>
+                <th>Status</th>
+                <th>Pracownik</th>
+            </tr>
+            {% for rent in rents %}
+            <tr>
+                <td><a href="">{{ rent.KlientID.first_name }}</a></td>
+                <td>{{ rent.Data }}</td>
+                <td>{{ rent.Data_zwrotu }}</td>
+                <td>{{ rent.KsiazkaID }}</td>
+                <td>{{ rent.get_stan_display }}</td>
+                <td>{{ rent.PracownikID }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </main>
+
+
+    <footer>
+        <p>&copy; 2024 Biblioteka</p>
+    </footer>
+</body>
+</html>

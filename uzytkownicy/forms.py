@@ -1,14 +1,11 @@
 from django import forms
 from .models import User, Permissions
-from django.contrib.auth import get_user_model
-User = get_user_model()
-from django.contrib.auth.forms import UserCreationForm
 
 class UserCreateUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'password_db', 'email', 'Telefon',
-            'Pesel', 'Data_urodzenia', 'Plec', 'pracownik']
+        fields = ['username', 'first_name', 'last_name', 'email', 'Telefon',
+            'Pesel', 'Data_urodzenia', 'Plec', 'Bibliotekarz', 'ManagerBiblioteki']
         
         widgets = { 'Data_urodzenia': (forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}))}
         
@@ -16,19 +13,32 @@ class UserCreateUpdateForm(forms.ModelForm):
             'username': 'Login',
             'first_name': 'Imię',
             'last_name': 'Nazwisko',
-            'password_db': 'Hasło',
             'Telefon': 'Telefon',
             'Pesel': 'Pesel',
             'Data_urodzenia': 'Data urodzenia',
             'Plec': 'Płeć',
-            'pracownik': 'Pracownik',
+            'Bibliotekarz': 'Bibliotekarz',
+            'ManagerBiblioteki': 'Manager'
         }
 
 class UserChangePasswordForm(forms.ModelForm):
+    confirm_password = forms.CharField(max_length=15, label='Powtórz hasło', widget=forms.PasswordInput())
+
     class Meta:
         model = User
-        fields = ['password_db']
-        labels = {'password_db': 'Hasło'}
+        fields = ['current_password']
+        labels = {'current_password': 'Hasło'}
+
+        widgets = {'current_password': (forms.PasswordInput())}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        current_password = cleaned_data.get('current_password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        if current_password and confirm_password and current_password != confirm_password:
+            raise forms.ValidationError("Hasła nie pasują do siebie")
+        return cleaned_data
 
 class UserDeleteForm(forms.ModelForm):
     class Meta:

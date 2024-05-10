@@ -13,14 +13,18 @@ class User(AbstractUser):
     # Adres_ID = models.OneToOneField(Adres, on_delete=models.CASCADE, null=False)
     Pesel = models.CharField(max_length=11, unique=True, null=False, validators=[regex_pesel, validate_pesel])
     Data_urodzenia = models.DateField(null = False)
-    password_db = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
-    generated_password = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
+    current_password = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
+    password_1 = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
+    password_2 = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
+    password_3 = models.CharField(max_length=15, null=False, blank=False, validators=[password_validator])
     passwords_attempts = models.IntegerField(default=0)
     Plec = models.IntegerField(choices=choices, null=False)
-    pracownik = models.BooleanField(default = False)
+    Bibliotekarz = models.BooleanField(default = False)
+    ManagerBiblioteki = models.BooleanField(default = False)
     utworzony = models.DateTimeField(auto_now_add=True)
     edytowany = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
+    is_password_changed = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['Telefon', 'Pesel', 'Data_urodzenia', 'Plec']
 
@@ -54,8 +58,10 @@ class User(AbstractUser):
         else:
             raise ValidationError('Pesel nie jest prawidłowy')
         
+        if self.current_password == self.password_1 or self.current_password == self.password_2 or self.current_password == self.password_3:
+            raise ValidationError('Hasło jest takie samo jak jedno z trzech ostatnich')
+        
     def save(self, *args, **kwargs):
-        #zmiana zapisu loginu i maila
         self.username = self.username.lower().capitalize()
         self.email = self.email.lower()
         return super(User, self).save(*args, **kwargs)
@@ -63,7 +69,7 @@ class User(AbstractUser):
 
 
 class Permissions(models.Model):
-    User = models.OneToOneField(User, on_delete=models.CASCADE)
+    User = models.ForeignKey(User, on_delete=models.CASCADE)
     Add_books = models.BooleanField(verbose_name="Dodawanie książek", default=False)
     Delete_books = models.BooleanField(verbose_name="Usuwanie książek", default=False)
     Edit_books = models.BooleanField(verbose_name="Edytowanie książek", default=False)
@@ -76,15 +82,3 @@ class Permissions(models.Model):
 
     def __str__(self) -> str:
         return f"{self.User.username}'s permissions"
-    
-
-
-
-# class Adresy(models.Model):
-#     AdresID = models.AutoField(primary_key=True)
-#     Miasto =  models.CharField(max_length=50, null=False)
-#     Kodpocztowy = models.CharField(max_length = 5,null = False)
-#     Ulica =  models.CharField(max_length=50, null=False)
-#     Nr_domu =  models.PositiveIntegerField( null=False)
-#     Nr_mieszkania =  models.PositiveIntegerField( null=True)
-

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteka - Dodaj użytkownika</title>
+    <style>
+        body {
+            background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333; 
+            color: white; 
+            padding: 10px;
+            text-align: center;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        nav ul li a {
+            color: white; 
+            text-decoration: none;
+        }
+        main {
+            padding: 20px 20px 60px 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #555;
+            color: white; 
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        button, input[type='submit'] {
+            padding: 10px 20px;
+            border: none;
+            background-color: black; 
+            color: white; 
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px; 
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        .button-group {
+            margin-top: 1px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        select {
+            padding: 15px; 
+            margin-bottom: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: none;
+            display: block; 
+            margin: auto;
+            background-color: #eee; 
+        }
+
+        /* label {
+            display: block; 
+            margin-bottom: 5px;
+            margin-top: 10px;
+            color: white; 
+            text-shadow: -1px -1px 0 #000,  
+                  1px -1px 0 #000,
+                  -1px 1px 0 #000,
+                   1px 1px 0 #000; 
+} */
+        .helptext {
+            color: white; /* Zmiana koloru tekstu na biały */
+            text-shadow: -1px -1px 0 #000,  
+                      1px -1px 0 #000,
+                     -1px 1px 0 #000,
+                      1px 1px 0 #000; /* Dodanie czarnej obwódki */
+            padding-bottom: 10px;
+    }
+
+    form{
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px 0 20px 0;
+    width: 600px;
+    display: inline-block;
+    margin-bottom: 30px;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Witaj w bibliotece</h1>
+        <nav>
+            <ul style="display: inline;">
+                <li><a href="{% url 'home' %}">Strona główna</a></li>
+                <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Wyloguj</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Zaloguj</a></li>    
+                <li><a href="{% url 'register' %}">Zarejestruj</a></li>
+            {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Wypożycz:</h2>
+        <form method="POST" action="">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Wypożycz">
+        </form>
+
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Biblioteka</p>
+    </footer>
+</body>
+</html>

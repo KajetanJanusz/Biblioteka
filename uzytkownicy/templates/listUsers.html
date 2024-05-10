@@ -97,6 +97,17 @@
             font-size: 24px; 
             font-weight: bold; 
         }
+
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+            border: 1px solid #4F8A10;
+            padding: 10px;
+            margin: 10px 0;
+            display: inline;
+            left: 50%;
+            transform: translate(-50%, -50%);  
+            }
     </style>
 </head>
 <body>
@@ -112,18 +123,32 @@
                 <li><a href="{% url 'logout' %}">Wyloguj</a></li>
             {% else %}
                 <li><a href="{% url 'login' %}">Zaloguj</a></li>    
-                <li><a href="{% url 'register' %}">Zarejestruj</a></li>
             {% endif %}
             </ul>
         </nav>
     </header>
 
     <main>
+
+
+        {% if page == None %}
         <form action="" method="get">
             <label for="search">Wyszukaj użytkownika:</label>
             <br>
             <input id="search" name="q" type="text" placeholder="Wyszukaj...">
         </form>
+        {% endif %}
+
+        <h1>{{ page }}</h1>
+
+        
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         
         <table>
             <tr>

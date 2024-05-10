@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteka - Logowanie</title>
+    <style>
+        body {
+            background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333; 
+            color: white; 
+            padding: 10px;
+            text-align: center;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        nav ul li a {
+            color: white; 
+            text-decoration: none;
+        }
+        main {
+            padding: 20px 20px 60px 20px;
+            text-align: center;
+        }
+        footer {
+            background-color: #555;
+            color: white; 
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .login {
+            background: rgba(255, 255, 255, 0.7); /* Przezroczyste tło */
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            margin: auto;
+            margin-top: 50px;
+            transition: box-shadow 0.3s;
+        }
+
+        .login:hover {
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .login label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .login input[type="text"],
+        .login input[type="password"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+
+        .login input[type="text"]:focus,
+        .login input[type="password"]:focus {
+            outline: none;
+            border-color: #555;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .login input[type="submit"] {
+            padding: 12px 20px;
+            border: none;
+            background-color: #333;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .login input[type="submit"]:hover {
+            background-color: #555;
+        }
+
+        .forgot-password {
+            display: inline-block;
+            padding: 12px 20px;
+            border: none;
+            background-color: #333;
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .forgot-password:hover {
+            background-color: #555;
+        }
+
+        .error {
+            display: inline;
+            color: #d8000c;
+            background-color: #ffbaba;
+            border: 1px solid #ff0000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+            border: 1px solid #4F8A10;
+            padding: 10px;
+            margin: 10px 0;
+            display: inline;
+            border-radius: 10px;
+            left: 50%;
+            transform: translate(-50%, -50%);  
+            }
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Witaj w bibliotece</h1>
+        <nav>
+            <ul style="display: inline;">
+                <li><a href="{% url 'home' %}">Strona główna</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
+                    <li><a href="{% url 'logout' %}">Wyloguj</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Zaloguj</a></li>    
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        <div class="login">
+            <form method="POST" action="">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Dodaj"/>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Biblioteka</p>
+    </footer>
+</body>
+</html>

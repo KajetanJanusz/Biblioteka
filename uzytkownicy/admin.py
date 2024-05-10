@@ -11,8 +11,9 @@ class MyUserAdmin(UserAdmin):
     readonly_fields = ['edytowany', 'utworzony']
     fieldsets = UserAdmin.fieldsets + (
         ('Dodatkowe', {'fields': ('Telefon',
-            'Pesel', 'Data_urodzenia', 'password_db', 'generated_password', 'passwords_attempts' ,'Plec', 'pracownik',
-            'is_deleted', 'utworzony', 'edytowany')}),
+            'Pesel', 'Data_urodzenia', 'current_password', 'password_1',
+             'password_2', 'password_3', 'passwords_attempts' ,'Plec', 'Bibliotekarz', 'ManagerBiblioteki',
+            'is_deleted', 'is_password_changed', 'utworzony', 'edytowany')}),
     )
 
 admin.site.register(User, MyUserAdmin)

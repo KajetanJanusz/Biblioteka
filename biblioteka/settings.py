@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'localflavor',
 
     'uzytkownicy.apps.UzytkownicyConfig',
+
+    'bibliotekarz.apps.BibliotekarzConfig',
 ]
 
 MIDDLEWARE = [
@@ -61,7 +63,7 @@ LOGIN_REDIRECT_URL = 'login'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

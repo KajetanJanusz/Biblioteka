@@ -135,8 +135,12 @@ th {
                 <td>{{ user.Data_urodzenia }}</td>
             </tr>
             <tr>
-                <td>Pracownik</td>
-                <td>{% if user.Pracownik == 'False' %}Nie{% else %}Tak{% endif %}</td>
+                <td>Bibliotekarz</td>
+                <td>{% if user.Bibliotekarz == 0 %}Nie{% else %}Tak{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Manager</td>
+                <td>{% if user.ManagerBiblioteki == 0 %}Nie{% else %}Tak{% endif %}</td>
             </tr>
             <tr>
                 <td>Płeć</td>

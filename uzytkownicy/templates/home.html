@@ -65,6 +65,18 @@ footer {
   transform: translate(-50%, -50%);  
 }
 
+.info {
+            display: inline;
+            color: #00529b;
+            background-color: #bde5f8;
+            border: 1px solid #007bc5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);  
+        }
 
     </style>
 </head>
@@ -76,6 +88,8 @@ footer {
                 <li><a href="{% url 'home' %}">Strona główna</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
+                <li><a href="{% url 'registered-books' %}">Rejestr książek</a></li>
+                <li><a href="{% url 'books' %}">Książki</a></li>
                 <li><a href="{% url 'logout' %}">Wyloguj</a></li>
             {% else %}
                 <li><a href="{% url 'login' %}">Zaloguj</a></li>    
