@@ -17,21 +17,22 @@ from django.core.exceptions import ObjectDoesNotExist
 from .methods import generate_password, send_email, change_passwords
 from django.contrib.auth.views import LoginView
 
+class HandleNoPermission(UserPassesTestMixin):
 
-class HomeSite(ListView):
-    model = User
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
+
+
+class HomeSite(TemplateView):
     template_name = 'home.html'
 
-class ListUsersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class ListUsersView(LoginRequiredMixin, HandleNoPermission, ListView):
     model = User
     template_name = 'listUsers.html'
 
     def test_func(self) -> bool | None:
         return Permissions.objects.get(User=self.request.user.id).List_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
     
     def get_queryset(self):
         query = self.request.GET.get('q')
@@ -47,19 +48,15 @@ class ListUsersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             return users
 
 
-class DetailUserView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+class DetailUserView(LoginRequiredMixin, HandleNoPermission, DetailView):
     model = User
     context_object_name = 'user'
     template_name = 'detailUser.html'
 
     def test_func(self) -> bool | None:
         return Permissions.objects.get(User=self.request.user.id).Detail_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
 
-class AddUserView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class AddUserView(LoginRequiredMixin, HandleNoPermission, CreateView):
     model = User
     form_class = UserCreateUpdateForm
     template_name = 'addUser.html'
@@ -67,12 +64,8 @@ class AddUserView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def test_func(self) -> bool | None:
         return Permissions.objects.get(User=self.request.user.id).Add_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
 
-class UpdateUserView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class UpdateUserView(LoginRequiredMixin, HandleNoPermission, UpdateView):
     model = User
     form_class = UserCreateUpdateForm
     template_name = 'updateUser.html'
@@ -80,13 +73,8 @@ class UpdateUserView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self) -> bool | None:
         return Permissions.objects.get(User=self.request.user.id).Edit_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
 
-
-class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class DeleteUserView(LoginRequiredMixin, HandleNoPermission, UpdateView):
     model = User
     form_class = UserDeleteForm
     template_name = 'deleteUser.html'
@@ -95,11 +83,8 @@ class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self) -> bool | None:
         return Permissions.objects.get(User=self.request.user.id).Delete_user
     
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
     
-class ChangeUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class ChangeUserPasswordView(LoginRequiredMixin, HandleNoPermission, UpdateView):
     model = User
     form_class = UserChangePasswordForm
     template_name = 'updatePassword.html'
@@ -123,11 +108,8 @@ class ChangeUserPasswordView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
         else:
             return Permissions.objects.get(User=self.request.user.id).Edit_user
     
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
 
-class ChangeUserPasswordDoneView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class ChangeUserPasswordDoneView(LoginRequiredMixin, HandleNoPermission, TemplateView):
     template_name = 'updatePasswordDone.html'
     uccess_url = reverse_lazy('home')
 
@@ -136,12 +118,8 @@ class ChangeUserPasswordDoneView(LoginRequiredMixin, UserPassesTestMixin, Templa
             return True
         else:
             return Permissions.objects.get(User=self.request.user.id).Edit_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
 
-class ResetPasswordView(FormView):
+class ResetPasswordView(HandleNoPermission, FormView):
     form_class = UserChangePasswordForm
     template_name = 'resetPassword.html'
 
@@ -173,13 +151,8 @@ class ResetPasswordView(FormView):
             return True
         else:
             return Permissions.objects.get(User=self.request.user.id).Edit_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
 
-
-class PermissionsView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class PermissionsView(LoginRequiredMixin, HandleNoPermission, UpdateView):
     model = Permissions
     form_class = UpdatePermissions
     template_name = 'permissionsUser.html'
@@ -201,11 +174,6 @@ class PermissionsView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         else:
             return Permissions.objects.get(User=self.request.user.id).Edit_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
-
 
 class CustomLoginView(LoginView):
     template_name = 'login_register.html'
@@ -253,7 +221,7 @@ class CustomLogoutView(LoginRequiredMixin, View):
 class ListPermissionsView(TemplateView):
     template_name = 'listPermissions.html'
 
-class AddUserPermissionView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class AddUserPermissionView(LoginRequiredMixin, HandleNoPermission, ListView):
     model = User
     template_name = 'listUsers.html'
     permission = Permissions.objects.filter(Add_user=True).values_list('User', flat=True)
@@ -264,10 +232,6 @@ class AddUserPermissionView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
     def test_func(self, *args, **kwargs) -> bool | None:
         return Permissions.objects.get(User=self.request.user.id).Edit_user
-    
-    def handle_no_permission(self):
-        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
-        return redirect('home')
     
 class ListUserPermissionView(AddUserPermissionView):
     permission = Permissions.objects.filter(List_user=True).values_list('User', flat=True)

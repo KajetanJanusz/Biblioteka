@@ -108,6 +108,16 @@
             left: 50%;
             transform: translate(-50%, -50%);  
             }
+
+            .error {
+            display: inline;
+            color: #d8000c;
+            background-color: #ffbaba;
+            border: 1px solid #ff0000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -127,6 +137,13 @@
     </header>
 
     <main>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
 
         {% if page == None %}
@@ -140,13 +157,7 @@
         <h1>{{ page }}</h1>
 
         
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+
         
         <table>
             <tr>
@@ -159,7 +170,7 @@
             </tr>
             {% for rent in rents %}
             <tr>
-                <td><a href="">{{ rent.KlientID.first_name }}</a></td>
+                <td><a href="{% url 'rent' rent.id %}">{{ rent.KlientID.first_name }}</a></td>
                 <td>{{ rent.Data }}</td>
                 <td>{{ rent.Data_zwrotu }}</td>
                 <td>{{ rent.KsiazkaID }}</td>

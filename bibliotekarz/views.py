@@ -1,13 +1,14 @@
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import FormView, TemplateView, ListView, DetailView, CreateView, UpdateView, View
 from .models import Ksiazki, Wypozyczenia, Rejestracje, User
 from django.urls import reverse_lazy, reverse
-from .forms import RegisterBookForm, RentBookForm
+from .forms import RegisterBookForm, RentBookForm, ExtendRentalForm
 from django.db.models import Q
 from django.contrib.auth.models import Permission
 from datetime import timedelta, datetime
+from django.contrib import messages
 
 class ListBooksView(ListView):
     model = Ksiazki
@@ -47,23 +48,51 @@ class BorrowBookView(FormView):
     def post(self, request, *args, **kwargs):
         rent = Wypozyczenia(
         Data = datetime.now(),
-        Data_zwrotu = datetime.now() + timedelta(14),
+        Data_zwrotu = datetime.now() + timedelta(30),
         KsiazkaID = Ksiazki.objects.get(id=self.kwargs['pk']),
         PracownikID = request.user,
         Stan = 0,
         KlientID = User.objects.get(id=self.request.POST.get('KlientID')))
         rent.save()
-        book = Ksiazki.objects.get(id=self.kwargs['pk'])
+        book = Ksiazki.objects.get(id=rent.KsiazkaID.id)
         book.Liczba_egzamplarzy -= 1
         if book.Liczba_egzamplarzy == 0:
             book.Stan = 'Wypożyczona'
         book.save()
         return super().post(request, *args, **kwargs)
 
-class ExtendRental(UpdateView):
+class ExtendReturnRentView(UpdateView):
     model = Wypozyczenia
     template_name = 'extendRental.html'
-    form_class = ''
+    success_url = reverse_lazy('rents')
+    form_class = ExtendRentalForm
+
+    def post(self, request, *args, **kwargs):
+        rent = self.get_object()
+        if 'extend' in request.POST:
+            if rent.Stan in [1, 2, 3]:
+                messages.error(request, 'Nie można przedłużyć tego wypożyczenia.')
+                return redirect('rents')
+
+            rent.Data_zwrotu = rent.Data_zwrotu + timedelta(30)
+            rent.Stan = 1
+            rent.save()
+            messages.success(request, 'Wypożyczenie przedłużono pomyślnie')
+            return redirect('rents')
+        elif 'end' in request.POST:
+            if rent.Stan == 3:
+                messages.error(request, 'To wypożyczenie jest już zakończone')
+                return redirect('rents')
+            rent.Stan = 3
+            rent.Data_zwrotu = datetime.now()
+            book = Ksiazki.objects.get(id=rent.KsiazkaID.id)
+            book.Liczba_egzamplarzy += 1
+            if book.Liczba_egzamplarzy > 0:
+                book.Stan = 'Dostępna'
+            rent.save()
+            book.save()
+            messages.success(request, 'Wypożyczenie zakończono pomyślnie')
+            return redirect('rents')
 
 class ListRentsView(ListView):
     model = Permission

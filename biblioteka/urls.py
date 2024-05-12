@@ -48,5 +48,6 @@ urlpatterns = [
     path('book/<int:pk>', viewsb.DetailBookView.as_view(), name='book'),
     path('borrow-book/<int:pk>', viewsb.BorrowBookView.as_view(), name='borrow-book'),
     path('rents', viewsb.ListRentsView.as_view(), name='rents'),
-    path('registered-books', viewsb.RegisteredBooksView.as_view(), name='registered-books')
+    path('registered-books', viewsb.RegisteredBooksView.as_view(), name='registered-books'),
+    path('rent/<int:pk>', viewsb.ExtendReturnRentView.as_view(), name='rent'),
 ]
