@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteka - Lista Użytkowników</title>
     <style>
+
         body {
-            background-image: url('{% static "img/6b695030-7469-4415-945d-a0fe872c6665.jpeg" %}');
+            background-image: url('/static/img/6b695030-7469-4415-945d-a0fe872c6665.jpeg');
             background-size: cover;
             background-repeat: no-repeat;
             font-family: Arial, sans-serif;
@@ -50,20 +51,23 @@
         select {
             padding: 10px;
             font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
         button {
             padding: 10px 20px;
             border: none;
-            background-color: #4caf50;
+            background-color: black; /* Zmiana koloru na czarny */
             color: white;
             border-radius: 5px;
             cursor: pointer;
             margin: 0 5px;
+            transition: background-color 0.3s;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #333;
         }
         .button-group {
             margin-top: 20px;
@@ -78,6 +82,7 @@
         th, td {
             padding: 8px;
             border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd; /* Linie oddzielające kolumny */
             text-align: left;
         }
         th {
@@ -88,10 +93,12 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        input[type="text"] {
-            padding: 10px;
-            font-size: 16px;
-            width: 60%;
+        input[type="text"], input[type="date"] {
+            padding: 8px; /* Zmniejszenie rozmiaru okienek kalendarza */
+            font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+            width: 30%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
         label {
             font-size: 24px; 
@@ -107,7 +114,12 @@
             display: inline;
             left: 50%;
             transform: translate(-50%, -50%);  
-            }
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -132,12 +144,12 @@
 
         {% if page == None %}
         <form action="" method="get">
-            <label for="search">Wyszukaj użytkownika:</label>
+            <label for="search">Wyszukaj rejestrację:</label>
             <br>
             <input id="search" name="q" type="text" placeholder="Wyszukaj...">
             <input type="date" id="start" name="start-date"/>
             <input type="date" id="end" name="end-date"/>
-            <input type="submit" name="" id="">
+            <button type="submit">Szukaj</button>
         </form>
         {% endif %}
 
