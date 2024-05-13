@@ -19,13 +19,14 @@ class Ksiazki(models.Model):
     Tytul = models.CharField(max_length=100, null=False)
     Autor = models.CharField(max_length=50, null=False)
     Gatunek = models.ForeignKey(Gatunki, on_delete=models.CASCADE)
-    Liczba_stron = models.IntegerField()
+    Liczba_stron = models.PositiveIntegerField()
     Wydawnictwo = models.CharField(max_length=50)
-    Rok_wydania = models.IntegerField()
+    Rok_wydania = models.PositiveIntegerField()
     Cena = models.DecimalField(decimal_places=2, max_digits=5)
-    Liczba_egzamplarzy = models.IntegerField()
+    Liczba_egzamplarzy = models.PositiveIntegerField()
     Opis = models.CharField(max_length=1000)
     Stan = models.CharField(choices=Stany, max_length=20)
+    Utworzone_przez = models.ForeignKey(User, on_delete=models.CASCADE)
     
     def __str__(self) -> str:
         return self.Tytul

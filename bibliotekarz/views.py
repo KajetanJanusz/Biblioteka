@@ -1,4 +1,5 @@
 from django.db.models.query import QuerySet
+from django.forms import BaseModelForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import FormView, TemplateView, ListView, DetailView, CreateView, UpdateView, View
@@ -9,11 +10,25 @@ from django.db.models import Q
 from django.contrib.auth.models import Permission
 from datetime import timedelta, datetime
 from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
-class ListBooksView(ListView):
+class HandleNoPermission(UserPassesTestMixin):
+
+    def handle_no_permission(self):
+        messages.info(self.request, 'Nie masz uprawnień, żeby wejść na tą stronę')
+        return redirect('home')
+
+class ListBooksView(LoginRequiredMixin, HandleNoPermission, ListView):
     model = Ksiazki
     template_name = 'listBooks.html'
     context_object_name = 'books'
+
+    def test_func(self) -> bool | None:
+        user = User.objects.get(id=self.request.user.id)
+        if user.ManagerBiblioteki == True or user.Bibliotekarz == True:
+            return True
+        else:
+            return False
 
     def get_queryset(self):
         query = self.request.GET.get('q')
@@ -28,16 +43,28 @@ class ListBooksView(ListView):
             books = Ksiazki.objects.all()
             return books
         
-class DetailBookView(DetailView):
+class DetailBookView(LoginRequiredMixin, HandleNoPermission, DetailView):
     model = Ksiazki
     template_name = 'detailBook.html'
     context_object_name = 'book'
 
-class RegisterBookView(CreateView):
-    model = Ksiazki
+    def test_func(self) -> bool | None:
+        return User.objects.get(id=self.request.user.id).Bibliotekarz
+
+class RegisterBookView(LoginRequiredMixin, HandleNoPermission, CreateView):
     template_name = 'registerBook.html'
     form_class = RegisterBookForm
     success_url = reverse_lazy('home')
+
+    def test_func(self) -> bool | None:
+        return User.objects.get(id=self.request.user.id).Bibliotekarz
+
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
+        obj = form.save(commit=False)
+        obj.Utworzone_przez = self.request.user
+        obj.save()
+        messages.success(self.request, 'Dodano książkę')
+        return redirect('home')
 
 class BorrowBookView(FormView):
     model = Wypozyczenia
@@ -95,7 +122,7 @@ class ExtendReturnRentView(UpdateView):
             return redirect('rents')
 
 class ListRentsView(ListView):
-    model = Permission
+    model = Wypozyczenia
     template_name = 'rents.html'
     context_object_name = 'rents'
 
@@ -110,10 +137,13 @@ class ListRentsView(ListView):
             rents = Wypozyczenia.objects.all()
             return rents
 
-class RegisteredBooksView(ListView):
+class RegisteredBooksView(LoginRequiredMixin, HandleNoPermission, ListView):
     model = Rejestracje
     template_name = 'booksRegistration.html'
     context_object_name = 'registrations'
+
+    def test_func(self) -> bool | None:
+        return User.objects.get(id=self.request.user.id).ManagerBiblioteki
 
     def get_queryset(self):
         query = self.request.GET.get('q')
