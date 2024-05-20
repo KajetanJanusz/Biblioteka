@@ -34,18 +34,20 @@ def password_validator(value: str):
     digit = 0
     special_char = 0
 
-    if len(list_password) >= 8 and len(list_password) <= 15:
-        for x in list_password:
-            if x in 'QWERTYUIOPASDFGHJKLZXCVBNM':
-                uppercase += 1
-            if x in 'qwertyuiopasdfghjklzxcvbnm':
-                lowercase += 1
-            if x in '1234567890':
-                digit += 1
-            if x in '-_!*#$&':
-                special_char += 1
-        if uppercase == 0 or lowercase == 0 or digit == 0 or special_char == 0:
-            raise ValidationError('Hasło musi składać się z dużej litery, małej litery, liczby i znaku specjalnego')
-    else:
+    if len(list_password) <= 8 or len(list_password) >= 15:
         raise ValidationError('Hasło musi miec miedzy 8 a 15 znaków')
+
+    for x in list_password:
+        if x.isupper():
+            uppercase += 1
+        if x.islower():
+            lowercase += 1
+        if x.isdigit():
+            digit += 1
+        if x in '-_!*#$&':
+            special_char += 1
+
+    if uppercase == 0 or lowercase == 0 or digit == 0 or special_char == 0:
+            raise ValidationError('Hasło musi składać się z dużej litery, małej litery, liczby i znaku specjalnego')
+
                 

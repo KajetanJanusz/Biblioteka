@@ -4,7 +4,7 @@ from .models import Ksiazki, Wypozyczenia
 class RegisterBookForm(forms.ModelForm):
     class Meta:
         model = Ksiazki
-        exclude = ['Stan', 'Utworzone_przez']
+        exclude = ['Stan', 'Utworzone_przez', 'Liczba_dostepnych_egzemplarzy']
 
 class RentBookForm(forms.ModelForm):
     class Meta:

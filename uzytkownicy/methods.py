@@ -28,7 +28,7 @@ def send_email(new_password, user):
         message = f'Twoje nowe hasło {new_password}' 
         EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()
 
-def change_passwords(user: User):
+def history_password(user: User):
     user.password_3 = user.password_2
     user.password_2 = user.password_1
     user.password_1 = user.current_password

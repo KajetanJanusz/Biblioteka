@@ -11,6 +11,7 @@ def create_rejestracja(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Ksiazki)
 def assign_available_status(sender, instance, created, **kwargs):
     if created:
+        instance.Liczba_dostepnych_egzemplarzy = instance.Liczba_egzamplarzy
         instance.Stan = 'Dostępna'
         instance.save(update_fields=['Stan'])
 

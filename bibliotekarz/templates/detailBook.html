@@ -49,7 +49,7 @@
         table {
             margin: 20px auto;
             width: 80%;
-            background-color: rgba(255, 255, 255, 0.8); 
+            background-color: white; 
             border-collapse: collapse;
         }
         th, td {
@@ -87,7 +87,7 @@
             <ul>
                 <li><a href="{% url 'home' %}">Strona główna</a></li>
                 <li><a href="{% url 'users' %}">Lista użytkowników</a></li>
-                <li><a href="{% url 'addUser' %}">Dodaj</a></li>
+                <li><a href="{% url 'register-book' %}">Dodaj książkę</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'logout' %}">Wyloguj</a></li>
             {% else %}
@@ -139,6 +139,10 @@
             <tr>
                 <td>Liczba sztuk</td>
                 <td>{{ book.Liczba_egzamplarzy }}</td>
+            </tr>
+            <tr>
+                <td>Liczba sztuk dostępnych</td>
+                <td>{{ book.Liczba_dostepnych_egzemplarzy }}</td>
             </tr>
             <tr>
                 <td>Dostępność</td>

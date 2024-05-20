@@ -121,37 +121,6 @@
                 font-size: 24px;
                 margin-bottom: 20px;
             }
-
-            .pagination {
-        text-align: center; /* Center align the content within the pagination div */
-        margin-top: 20px; /* Add top margin for spacing */
-        background-color: #ffffff; /* Set white background color */
-        padding: 10px; /* Add padding around the pagination block */
-        border-radius: 5px; /* Optional: Add rounded corners */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle box shadow */
-    }
-
-    /* Style for the pagination links */
-    .pagination .step-links {
-        display: inline-block;
-    }
-
-    .pagination .step-links a {
-        padding: 5px 10px; /* Add padding around links */
-        text-decoration: none; /* Remove underline from links */
-        color: #333333; /* Set text color */
-    }
-
-    .pagination .step-links a:hover {
-        background-color: #f0f0f0; /* Add background color on hover */
-    }
-
-    /* Style for the current page indicator */
-    .pagination .current {
-        padding: 5px 10px; /* Add padding around current page indicator */
-        font-weight: bold; /* Make current page indicator bold */
-        color: #333333; /* Set text color */
-    }
         </style>
     </head>
     
@@ -162,7 +131,7 @@
             <ul>
                 <li><a href="/">Strona główna</a></li>
                 <li><a href="/rents">Wypożyczenia</a></li>
-                <li><a href="/register-book">Dodaj</a></li>
+                <li><a href="/register-book">Dodaj książkę</a></li>
                 <li><a href="/logout/">Wyloguj</a></li>
             </ul>
         </nav>
@@ -206,25 +175,6 @@
             {% endfor %}
         </table>
     </main>
-
-
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-            {% endif %}
-    
-            <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-            </span>
-    
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
-        </span>
-    </div>
 
     <footer>
         <p>&copy; 2024 Biblioteka</p>

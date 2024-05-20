@@ -58,7 +58,7 @@ class User(AbstractUser):
         else:
             raise ValidationError('Pesel nie jest prawidłowy')
         
-        if self.current_password == self.password_1 or self.current_password == self.password_2 or self.current_password == self.password_3:
+        if self.current_password in [self.password_1, self.password_2, self.password_3]:
             raise ValidationError('Hasło jest takie samo jak jedno z trzech ostatnich')
         
     def save(self, *args, **kwargs):

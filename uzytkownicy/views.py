@@ -14,7 +14,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
-from .methods import generate_password, send_email, change_passwords
+from .methods import generate_password, send_email, history_password
 from django.contrib.auth.views import LoginView
 
 class HandleNoPermission(UserPassesTestMixin):
@@ -92,7 +92,7 @@ class ChangeUserPasswordView(LoginRequiredMixin, HandleNoPermission, UpdateView)
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         user = User.objects.get(id=self.kwargs['pk'])
-        change_passwords(user)
+        history_password(user)
         user.is_password_changed = False
         user.save()
         return super().post(request, *args, **kwargs)
@@ -138,7 +138,7 @@ class ResetPasswordView(HandleNoPermission, FormView):
             return redirect('reset-password')
         
         new_password = generate_password()
-        change_passwords(user)
+        history_password(user)
         user.current_password = new_password
         user.is_password_changed = True
         user.save()
@@ -199,6 +199,7 @@ class CustomLoginView(LoginView):
             return redirect('login')
 
         if user.is_password_changed == True:
+            login(self.request.user)
             messages.info(request, 'Hasło zostało wygenerowane. Zmień hasło')
             return redirect(reverse('password-change', kwargs={'pk': user.id}))
             

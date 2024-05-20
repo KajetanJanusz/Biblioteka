@@ -1,6 +1,11 @@
 from typing import Iterable
 from django.db import models
 from uzytkownicy.models import User
+from django.core.exceptions import ValidationError
+
+def positive_decimal(input):
+    if input < 0:
+        raise ValidationError('Cena ujemna')
 
 
 class Gatunki(models.Model):
@@ -22,14 +27,19 @@ class Ksiazki(models.Model):
     Liczba_stron = models.PositiveIntegerField()
     Wydawnictwo = models.CharField(max_length=50)
     Rok_wydania = models.PositiveIntegerField()
-    Cena = models.DecimalField(decimal_places=2, max_digits=5)
+    Cena = models.DecimalField(decimal_places=2, null=False, validators=[positive_decimal], max_digits=5)
     Liczba_egzamplarzy = models.PositiveIntegerField()
+    Liczba_dostepnych_egzemplarzy = models.PositiveIntegerField()
     Opis = models.CharField(max_length=1000)
     Stan = models.CharField(choices=Stany, max_length=20)
     Utworzone_przez = models.ForeignKey(User, on_delete=models.CASCADE)
     
     def __str__(self) -> str:
         return self.Tytul
+    
+    def save(self, *args, **kwargs) -> None:
+        self.Liczba_dostepnych_egzemplarzy = self.Liczba_egzamplarzy
+        return super(Ksiazki, self).save(*args, **kwargs)
 
 
 class Wypozyczenia(models.Model):
