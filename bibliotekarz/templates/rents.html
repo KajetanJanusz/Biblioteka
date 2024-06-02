@@ -122,6 +122,18 @@
             margin: 10px 0;
             border-radius: 10px;
         }
+        form {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            input[type="text"], input[type="date"] {
+    padding: 8px;
+    font-size: 14px;
+    width: calc(20% - 10px); /* zmniejszenie szerokości o 10px dla marginesu przycisku */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-right: 10px; /* dodatkowy margines dla odstępu między elementami */
+}
     </style>
 </head>
 <body>
@@ -150,13 +162,13 @@
     {% endif %}
 
 
-        {% if page == None %}
         <form action="" method="get">
-            <label for="search">Wyszukaj rejestrację:</label>
-            <br>
+            <label for="search">Wyszukaj wypożyczenie:</label><br>
             <input id="search" name="q" type="text" placeholder="Wyszukaj...">
+            <input type="date" id="start" name="start-date">
+            <input type="date" id="end" name="end-date">
+            <button type="submit">Szukaj</button>
         </form>
-        {% endif %}
 
         <h1>{{ page }}</h1>
 
@@ -174,8 +186,8 @@
             </tr>
             {% for rent in rents %}
             <tr>
-                <td><a href="{% url 'rent' rent.id %}">{{ rent.KlientID.first_name }}</a></td>
-                <td>{{ rent.Data }}</td>
+                <td><a href="{% url 'user' rent.KlientID.id %}">{{ rent.KlientID.first_name }}</a></td>
+                <td><a href="{% url 'rent' rent.id %}">{{ rent.Data }}</a></td>
                 <td>{{ rent.Data_zwrotu }}</td>
                 <td>{{ rent.KsiazkaID }}</td>
                 <td>{{ rent.get_stan_display }}</td>

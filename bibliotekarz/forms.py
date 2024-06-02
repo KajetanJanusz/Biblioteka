@@ -9,7 +9,9 @@ class RegisterBookForm(forms.ModelForm):
 class RentBookForm(forms.ModelForm):
     class Meta:
         model = Wypozyczenia
-        fields = ['KlientID']
+        fields = ['KlientID', 'Data_zwrotu']
+
+        widgets = { 'Data_zwrotu': (forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}))}
 
 class ExtendRentalForm(forms.ModelForm):
     class Meta:

@@ -11,6 +11,7 @@ from django.contrib.auth.models import Permission
 from datetime import timedelta, datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.shortcuts import get_object_or_404
 
 class HandleNoPermission(UserPassesTestMixin):
 
@@ -73,20 +74,27 @@ class BorrowBookView(FormView):
     success_url = reverse_lazy('home')
 
     def post(self, request, *args, **kwargs):
+        return_date = self.request.POST.get('Data_zwrotu')
         rent = Wypozyczenia(
         Data = datetime.now(),
-        Data_zwrotu = datetime.now() + timedelta(30),
-        KsiazkaID = Ksiazki.objects.get(id=self.kwargs['pk']),
+        Data_zwrotu = return_date if return_date else datetime.now() + timedelta(14),
+        KsiazkaID = get_object_or_404(Ksiazki, id=self.kwargs['pk']),
         PracownikID = request.user,
         Stan = 0,
         KlientID = User.objects.get(id=self.request.POST.get('KlientID')))
+
         rent.save()
-        book = Ksiazki.objects.get(id=rent.KsiazkaID.id)
-        book.Liczba_egzamplarzy -= 1
-        if book.Liczba_egzamplarzy == 0:
+        
+        book = get_object_or_404(Ksiazki, id=self.kwargs['pk'])
+        book.Liczba_dostepnych_egzemplarzy = book.Liczba_dostepnych_egzemplarzy - 1
+        if book.Liczba_dostepnych_egzemplarzy <= 0:
             book.Stan = 'Wypożyczona'
+
         book.save()
-        return super().post(request, *args, **kwargs)
+
+        messages.success(request, 'Książka została wypożyczona')
+        
+        return redirect('home')
 
 class ExtendReturnRentView(UpdateView):
     model = Wypozyczenia
@@ -97,11 +105,11 @@ class ExtendReturnRentView(UpdateView):
     def post(self, request, *args, **kwargs):
         rent = self.get_object()
         if 'extend' in request.POST:
-            if rent.Stan in [1, 2, 3]:
+            if rent.Stan in [2, 3]:
                 messages.error(request, 'Nie można przedłużyć tego wypożyczenia.')
                 return redirect('rents')
 
-            rent.Data_zwrotu = rent.Data_zwrotu + timedelta(30)
+            rent.Data_zwrotu = rent.Data_zwrotu + timedelta(14)
             rent.Stan = 1
             rent.save()
             messages.success(request, 'Wypożyczenie przedłużono pomyślnie')
@@ -113,8 +121,8 @@ class ExtendReturnRentView(UpdateView):
             rent.Stan = 3
             rent.Data_zwrotu = datetime.now()
             book = Ksiazki.objects.get(id=rent.KsiazkaID.id)
-            book.Liczba_egzamplarzy += 1
-            if book.Liczba_egzamplarzy > 0:
+            book.Liczba_dostepnych_egzemplarzy += 1
+            if book.Liczba_dostepnych_egzemplarzy > 0:
                 book.Stan = 'Dostępna'
             rent.save()
             book.save()
@@ -128,10 +136,17 @@ class ListRentsView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        if query != None:
+        start = self.request.GET.get('start-date')
+        end = self.request.GET.get('end-date')
+        print(start, end)
+        if query:
             rents = Wypozyczenia.objects.filter(Q(KlientID__username__icontains=query) |
                                             Q(PracownikID__username__icontains=query) |
                                             Q(Stan__icontains=query))
+            return rents
+        elif start and end:
+            print('elo')
+            rents = Wypozyczenia.objects.filter(Data_zwrotu__gte=start, Data_zwrotu__lte=end)
             return rents
         else:
             rents = Wypozyczenia.objects.all()
@@ -149,6 +164,8 @@ class RegisteredBooksView(LoginRequiredMixin, HandleNoPermission, ListView):
         query = self.request.GET.get('q')
         start = self.request.GET.get('start-date')
         end = self.request.GET.get('end-date')
+
+        print(start, end)
         if query:
             registrations = Rejestracje.objects.filter(Q(KsiazkaID__Tytul__icontains=query) |
                                                        Q(KsiazkaID__Autor__icontains=query) |

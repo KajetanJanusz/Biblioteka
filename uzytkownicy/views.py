@@ -90,14 +90,11 @@ class ChangeUserPasswordView(LoginRequiredMixin, HandleNoPermission, UpdateView)
     template_name = 'updatePassword.html'
     success_url = reverse_lazy('users')
 
-    def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
+    def form_valid(self, form: BaseModelForm) -> HttpResponse:
         user = User.objects.get(id=self.kwargs['pk'])
         history_password(user)
         user.is_password_changed = False
         user.save()
-        return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form: BaseModelForm) -> HttpResponse:
         form.save()
         messages.success(self.request, 'Zaktualizowano!')
         return super().form_valid(form)

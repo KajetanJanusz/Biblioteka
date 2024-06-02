@@ -13,7 +13,7 @@ def assign_available_status(sender, instance, created, **kwargs):
     if created:
         instance.Liczba_dostepnych_egzemplarzy = instance.Liczba_egzamplarzy
         instance.Stan = 'Dostępna'
-        instance.save(update_fields=['Stan'])
+        instance.save(update_fields=['Liczba_dostepnych_egzemplarzy', 'Stan'])
 
 post_save.connect(create_rejestracja, sender=Ksiazki)
 post_save.connect(assign_available_status, sender=Ksiazki)

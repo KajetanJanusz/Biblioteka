@@ -39,8 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'localflavor',
-
     'uzytkownicy.apps.UzytkownicyConfig',
 
     'bibliotekarz.apps.BibliotekarzConfig',
@@ -59,6 +57,18 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'biblioteka.urls'
 
 LOGIN_REDIRECT_URL = 'login'
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'update-rental-status-every-day': {
+        'task': 'biblioteka.tasks.update_rental_status_task',
+        'schedule': 86400.0,
+    },
+}
+
 
 TEMPLATES = [
     {

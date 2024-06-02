@@ -64,7 +64,7 @@
         }
         button {
             padding: 10px 20px;
-            border: none;
+            border: solid 1px;
             background-color: black; 
             color: white; 
             border-radius: 5px;
@@ -76,6 +76,7 @@
         }
         .button-group {
             margin-top: 20px;
+            margin-bottom: 50px;
             text-align: center;
         }
     </style>
@@ -149,13 +150,14 @@
                 <td>{{ book.Stan }}</td>
             </tr>
         </table>
+        {% if book.Stan != "Wypożyczona" %}
+        <div class="button-group">
+            <a href="{% url 'borrow-book' book.id %}"><button>Wypożycz</button></a>
+        </div>
+        {% endif %}
     </main>
 
-    {% if book.Stan != "Wypożyczona" %}
-    <div class="button-group">
-        <a href="{% url 'borrow-book' book.id %}"><button>Wypożycz</button></a>
-    </div>
-    {% endif %}
+
 
     <footer>
         <p>&copy; 2024 Biblioteka</p>

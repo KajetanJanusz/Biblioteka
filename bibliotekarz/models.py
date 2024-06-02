@@ -21,7 +21,7 @@ class Ksiazki(models.Model):
         ('Wypożyczona','Wypozyczona')
     ]
 
-    Tytul = models.CharField(max_length=100, null=False)
+    Tytul = models.CharField(max_length=100, null=False, unique=True)
     Autor = models.CharField(max_length=50, null=False)
     Gatunek = models.ForeignKey(Gatunki, on_delete=models.CASCADE)
     Liczba_stron = models.PositiveIntegerField()
@@ -36,10 +36,6 @@ class Ksiazki(models.Model):
     
     def __str__(self) -> str:
         return self.Tytul
-    
-    def save(self, *args, **kwargs) -> None:
-        self.Liczba_dostepnych_egzemplarzy = self.Liczba_egzamplarzy
-        return super(Ksiazki, self).save(*args, **kwargs)
 
 
 class Wypozyczenia(models.Model):
@@ -51,7 +47,7 @@ class Wypozyczenia(models.Model):
     ]
 
     Data = models.DateField(null=False)
-    Data_zwrotu = models.DateField(null=False)
+    Data_zwrotu = models.DateField(null=True, blank=True)
     Stan = models.IntegerField(choices=Stany)
     KsiazkaID = models.ForeignKey(Ksiazki, on_delete=models.CASCADE)
     PracownikID = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pracownik')
