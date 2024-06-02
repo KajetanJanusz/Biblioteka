@@ -138,14 +138,12 @@ class ListRentsView(ListView):
         query = self.request.GET.get('q')
         start = self.request.GET.get('start-date')
         end = self.request.GET.get('end-date')
-        print(start, end)
         if query:
             rents = Wypozyczenia.objects.filter(Q(KlientID__username__icontains=query) |
                                             Q(PracownikID__username__icontains=query) |
                                             Q(Stan__icontains=query))
             return rents
         elif start and end:
-            print('elo')
             rents = Wypozyczenia.objects.filter(Data_zwrotu__gte=start, Data_zwrotu__lte=end)
             return rents
         else:
