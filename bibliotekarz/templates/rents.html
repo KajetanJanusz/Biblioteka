@@ -180,6 +180,7 @@
                 <th>Klient</th>
                 <th>Data wypożyczenia</th>
                 <th>Data zwrotu</th>
+                <th>Okres wypożyczenia</th>
                 <th>Książka</th>
                 <th>Status</th>
                 <th>Pracownik</th>
@@ -189,8 +190,9 @@
                 <td><a href="{% url 'user' rent.KlientID.id %}">{{ rent.KlientID.first_name }}</a></td>
                 <td><a href="{% url 'rent' rent.id %}">{{ rent.Data }}</a></td>
                 <td>{{ rent.Data_zwrotu }}</td>
+                <td>{{ rent.get_rent_period.days }} dni</td>
                 <td>{{ rent.KsiazkaID }}</td>
-                <td>{{ rent.get_stan_display }}</td>
+                <td>{{ rent.Stan }}</td>
                 <td>{{ rent.PracownikID }}</td>
             </tr>
             {% endfor %}

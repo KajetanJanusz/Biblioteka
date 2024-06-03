@@ -40,24 +40,25 @@ class Ksiazki(models.Model):
 
 class Wypozyczenia(models.Model):
     Stany =[
-        (0,'Nowe'),
-        (1,'Przedłużone'),
-        (2,'Po terminie'),
-        (3,'Zakończone')
+        ('Nowe','Nowe'),
+        ('Przedłużone','Przedłużone'),
+        ('Po terminie','Po terminie'),
+        ('Zakończone','Zakończone')
     ]
 
     Data = models.DateField(null=False)
     Data_zwrotu = models.DateField(null=True, blank=True)
-    Stan = models.IntegerField(choices=Stany)
+    Stan = models.CharField(choices=Stany, max_length=100)
     KsiazkaID = models.ForeignKey(Ksiazki, on_delete=models.CASCADE)
     PracownikID = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pracownik')
     KlientID = models.ForeignKey(User, on_delete=models.CASCADE, related_name='klient')
-    
-    def get_stan_display(self):
-        return dict(self.Stany)[self.Stan]
-    
+
+    def get_rent_period(self):
+        return self.Data_zwrotu - self.Data
+
     def __str__(self) -> str:
         return f'{self.KsiazkaID.Tytul} wypożyczony dla {self.KlientID.first_name}'
+
 
 
 class Rejestracje(models.Model):
